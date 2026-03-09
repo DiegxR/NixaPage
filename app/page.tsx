@@ -82,11 +82,6 @@ export default function Home() {
     smoothing: SMOOTHING,
   });
 
-  // Autoplay: lo primero al cargar la página
-  useEffect(() => {
-    play();
-  }, [play]);
-
   useEffect(() => {
     const t = setTimeout(() => setShowMeteors(true), METEORS_START_AT * 1000);
     return () => clearTimeout(t);
@@ -130,6 +125,14 @@ export default function Home() {
   );
 
   const hasAudio = !!loadedFileName;
+  const hasAutoplayedRef = useRef(false);
+
+  // Reproducir en cuanto el audio esté listo (canplaythrough)
+  useEffect(() => {
+    if (!isReady || !hasAudio || hasAutoplayedRef.current) return;
+    hasAutoplayedRef.current = true;
+    play();
+  }, [isReady, hasAudio, play]);
 
   // Si el navegador bloquea autoplay, intentar reproducir en la primera interacción
   useEffect(() => {
