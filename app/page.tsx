@@ -1,15 +1,63 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAudioAnalyzer } from "@/hooks/useAudioAnalyzer";
 import { Scene } from "@/components/Scene";
 import { Meteors } from "@/components/Meteors";
 import { FFT_SIZE, SMOOTHING, DEFAULT_SONG_PATH, METEORS_START_AT, NEON_BUTTON_APPEAR_AT } from "@/config/visualizer";
 
+const CINEMA_IMAGE = "/Gemini_Generated_Image_3bupei3bupei3bup.png";
+
+function CinemaImageWithAnimation({
+  src,
+  onClick,
+}: {
+  src: string;
+  onClick: (e: React.MouseEvent) => void;
+}) {
+  const [phase, setPhase] = useState<"expand" | "pulse">("expand");
+
+  return (
+    <motion.img
+      src={src}
+      alt="You are my cinema"
+      className="max-w-[90vw] max-h-[90vh] w-auto h-auto object-contain select-none cursor-default"
+      initial={{ scale: 0, opacity: 0 }}
+      animate={
+        phase === "expand"
+          ? { scale: 1, opacity: 1 }
+          : { scale: [1, 1.04, 1] }
+      }
+      transition={
+        phase === "expand"
+          ? { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
+          : {
+              scale: {
+                repeat: Infinity,
+                repeatType: "reverse",
+                duration: 1.2,
+              },
+            }
+      }
+      onAnimationComplete={
+        phase === "expand"
+          ? () => setPhase("pulse")
+          : undefined
+      }
+      onClick={onClick}
+      style={{
+        filter: "drop-shadow(0 0 30px rgba(147, 51, 234, 0.5))",
+      }}
+    />
+  );
+}
+
 export default function Home() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [showMeteors, setShowMeteors] = useState(false);
   const [showNeonButton, setShowNeonButton] = useState(false);
+  const [showCinemaImage, setShowCinemaImage] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setShowMeteors(true), METEORS_START_AT * 1000);
@@ -99,25 +147,52 @@ export default function Home() {
 
       <Scene frequencyDataRef={frequencyDataRef} />
 
-      {/* Botón neon: aparece tras NEON_BUTTON_APPEAR_AT segundos */}
+      {/* Botón neon: centrado absoluto en la pantalla */}
       {showNeonButton && (
         <div
           className="neon-button-frame"
           style={{
             position: "fixed",
+            top: "50%",
             left: "50%",
-            bottom: "28%",
-            transform: "translateX(-50%)",
+            transform: "translate(-50%, -50%)",
             zIndex: 90,
             pointerEvents: "auto",
           }}
         >
-          <button type="button" className="tranlate-x-[-100px] custom-btn btn-5">
+          <button
+            type="button"
+            className="tranlate-x-[-100px] custom-btn btn-5"
+            onClick={() => setShowCinemaImage(true)}
+          >
             <span></span>
             <span>Conoce más</span>
           </button>
         </div>
       )}
+
+      {/* Overlay: imagen que se expande y palpita al hacer clic en "Conoce más" */}
+      <AnimatePresence>
+        {showCinemaImage && (
+          <motion.div
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setShowCinemaImage(false)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Escape" && setShowCinemaImage(false)}
+            aria-label="Cerrar"
+          >
+            <CinemaImageWithAnimation
+              src={CINEMA_IMAGE}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {isDragOver && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-sm border-4 border-dashed border-[#6b7fd7] rounded-lg pointer-events-none">
