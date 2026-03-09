@@ -50,7 +50,14 @@ export const AUDIO_START_AT = 40;
 
 /** Posición inicial de cámara (lejos) y final (cerca) para el timelapse */
 export const CAMERA_START_Z = 30;
-export const CAMERA_END_Z = 3;
+export const CAMERA_END_Z = 1;
+
+/** Durante el timelapse: amplitud del movimiento automático de cámara (posición X/Y) para reflejos */
+export const CAMERA_DRIFT_POSITION = 0.45;
+/** Durante el timelapse: amplitud del lookAt desplazado para cambios de perspectiva/reflejos */
+export const CAMERA_DRIFT_LOOKAT = 0.18;
+/** Velocidad del movimiento automático (rad/s): más bajo = más lento y suave */
+export const CAMERA_DRIFT_SPEED = 0.22;
 
 /** Movimiento lateral con el mouse: multiplicador de pointer.x y pointer.y (más = más recorrido) */
 export const MOUSE_LATERAL_AMOUNT = 2.2;

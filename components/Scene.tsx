@@ -22,7 +22,17 @@ export function Scene({ frequencyDataRef }: SceneProps) {
   const fileName = MODEL_3D_PATH.split("/").pop() ?? "modelo.glb";
 
   return (
-    <div className="absolute inset-0 w-full h-full" style={{ zIndex: 10 }}>
+    <div
+      className="w-full h-full"
+      style={{
+        position: "fixed",
+        inset: 0,
+        width: "100vw",
+        height: "100vh",
+        minHeight: "100vh",
+        zIndex: 10,
+      }}
+    >
       {modelError && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/80 backdrop-blur-sm p-6 text-center">
           <p className="text-red-400 font-medium">No se pudo cargar el modelo 3D</p>
