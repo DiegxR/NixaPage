@@ -11,11 +11,10 @@ export const SECOND_MODEL_PATH = "/need_some_space.glb";
 export const SECOND_MODEL_APPEAR_AT = 12;
 /** Segundos que tarda el modelo exterior en aparecer por completo */
 export const SECOND_MODEL_APPEAR_DURATION = 15;
-/** Escala del modelo exterior (mismo centro que el primero, mucho más grande) */
+/** Escala final del modelo exterior (mismo centro que el primero, mucho más grande) */
 export const SECOND_MODEL_SCALE = 65;
-/** Desplazamiento del modelo exterior para centrarlo (X, Y en unidades) */
-export const SECOND_MODEL_OFFSET_X = 0;
-export const SECOND_MODEL_OFFSET_Y = 0;
+/** Escala inicial del modelo exterior; crece progresivamente hasta SECOND_MODEL_SCALE */
+export const SECOND_MODEL_INITIAL_SCALE = 0.1;
 /** Segundos que tarda el movimiento (escala/ritmo) del modelo exterior en pasar de sutil a completo */
 export const SECOND_MODEL_MOVEMENT_GROW_DURATION = 18;
 

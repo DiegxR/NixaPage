@@ -19,8 +19,7 @@ import {
   SECOND_MODEL_APPEAR_AT,
   SECOND_MODEL_APPEAR_DURATION,
   SECOND_MODEL_SCALE,
-  SECOND_MODEL_OFFSET_X,
-  SECOND_MODEL_OFFSET_Y,
+  SECOND_MODEL_INITIAL_SCALE,
   SECOND_MODEL_MOVEMENT_GROW_DURATION,
   EDGES_THRESHOLD_ANGLE,
   MOUSE_LATERAL_AMOUNT,
@@ -271,7 +270,9 @@ export function MusicReactiveObject({ frequencyDataRef, onLoadError, disableMous
     const musicScale = 1 + avg * 0.5;
 
     if (outerGroupRef.current) {
-      const baseScale = SECOND_MODEL_SCALE * appearProgress;
+      const baseScale =
+        SECOND_MODEL_INITIAL_SCALE +
+        (SECOND_MODEL_SCALE - SECOND_MODEL_INITIAL_SCALE) * appearProgress;
       const outerMusicFactor = 1 + (musicScale - 1) * movementProgress;
       outerGroupRef.current.scale.setScalar(baseScale * outerMusicFactor);
     }
@@ -304,7 +305,7 @@ export function MusicReactiveObject({ frequencyDataRef, onLoadError, disableMous
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
-      <group ref={outerGroupRef} position={[SECOND_MODEL_OFFSET_X, SECOND_MODEL_OFFSET_Y, 0]} scale={[0, 0, 0]}>
+      <group ref={outerGroupRef} position={[0, 0, 0]} scale={[SECOND_MODEL_INITIAL_SCALE, SECOND_MODEL_INITIAL_SCALE, SECOND_MODEL_INITIAL_SCALE]}>
         {outerScene && <primitive object={outerScene} />}
       </group>
       <group ref={innerGroupRef} position={[0, 0, 0]} scale={[1, 1, 1]}>
