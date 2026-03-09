@@ -15,6 +15,10 @@ export const SECOND_MODEL_APPEAR_DURATION = 15;
 export const SECOND_MODEL_SCALE = 65;
 /** Escala inicial del modelo exterior; crece progresivamente hasta SECOND_MODEL_SCALE */
 export const SECOND_MODEL_INITIAL_SCALE = 0.1;
+/** Posición del modelo exterior (X, Y, Z en unidades). [0,0,0] = mismo centro que el modelo principal */
+export const SECOND_MODEL_OFFSET_X = -100;
+export const SECOND_MODEL_OFFSET_Y = -100;
+export const SECOND_MODEL_OFFSET_Z = 0;
 /** Segundos que tarda el movimiento (escala/ritmo) del modelo exterior en pasar de sutil a completo */
 export const SECOND_MODEL_MOVEMENT_GROW_DURATION = 18;
 

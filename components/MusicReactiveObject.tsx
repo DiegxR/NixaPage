@@ -20,6 +20,9 @@ import {
   SECOND_MODEL_APPEAR_DURATION,
   SECOND_MODEL_SCALE,
   SECOND_MODEL_INITIAL_SCALE,
+  SECOND_MODEL_OFFSET_X,
+  SECOND_MODEL_OFFSET_Y,
+  SECOND_MODEL_OFFSET_Z,
   SECOND_MODEL_MOVEMENT_GROW_DURATION,
   EDGES_THRESHOLD_ANGLE,
   MOUSE_LATERAL_AMOUNT,
@@ -273,8 +276,11 @@ export function MusicReactiveObject({ frequencyDataRef, onLoadError, disableMous
       const baseScale =
         SECOND_MODEL_INITIAL_SCALE +
         (SECOND_MODEL_SCALE - SECOND_MODEL_INITIAL_SCALE) * appearProgress;
-      const outerMusicFactor = 1 + (musicScale - 1) * movementProgress;
-      outerGroupRef.current.scale.setScalar(baseScale * outerMusicFactor);
+      outerGroupRef.current.scale.setScalar(baseScale);
+      const delta = state.clock.getDelta();
+      const rotSpeed = 0.35;
+      const musicRot = (low * 0.008 + mid * 0.004) * movementProgress;
+      outerGroupRef.current.rotation.y += delta * (rotSpeed + musicRot);
     }
     if (innerGroupRef.current) {
       innerGroupRef.current.scale.setScalar(musicScale);
@@ -305,7 +311,7 @@ export function MusicReactiveObject({ frequencyDataRef, onLoadError, disableMous
 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
-      <group ref={outerGroupRef} position={[0, 0, 0]} scale={[SECOND_MODEL_INITIAL_SCALE, SECOND_MODEL_INITIAL_SCALE, SECOND_MODEL_INITIAL_SCALE]}>
+      <group ref={outerGroupRef} position={[SECOND_MODEL_OFFSET_X, SECOND_MODEL_OFFSET_Y, SECOND_MODEL_OFFSET_Z]} scale={[SECOND_MODEL_INITIAL_SCALE, SECOND_MODEL_INITIAL_SCALE, SECOND_MODEL_INITIAL_SCALE]}>
         {outerScene && <primitive object={outerScene} />}
       </group>
       <group ref={innerGroupRef} position={[0, 0, 0]} scale={[1, 1, 1]}>

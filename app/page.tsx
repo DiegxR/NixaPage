@@ -118,12 +118,29 @@ export default function Home() {
   const hasAudio = !!loadedFileName;
   const hasAutoplayed = useRef(false);
 
+  // Autoplay en cuanto el audio por defecto esté listo al cargar la página
   useEffect(() => {
     if (isReady && hasAudio && !hasAutoplayed.current) {
       hasAutoplayed.current = true;
       play();
     }
   }, [isReady, hasAudio, play]);
+
+  // Refuerzo: si el navegador bloquea autoplay, intentar reproducir en la primera interacción
+  useEffect(() => {
+    const tryPlayOnInteraction = () => {
+      if (isReady && hasAudio && !isPlaying) {
+        play();
+      }
+    };
+    const events = ["click", "keydown", "touchstart"] as const;
+    const fn = () => {
+      tryPlayOnInteraction();
+      events.forEach((e) => document.removeEventListener(e, fn));
+    };
+    events.forEach((ev) => document.addEventListener(ev, fn, { once: true }));
+    return () => events.forEach((ev) => document.removeEventListener(ev, fn));
+  }, [isReady, hasAudio, isPlaying, play]);
 
   return (
     <main
@@ -194,16 +211,18 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {isDragOver && (
+      {/* Overlay de soltar archivo: oculto (subida de archivos no visible) */}
+      {false && isDragOver && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-sm border-4 border-dashed border-[#6b7fd7] rounded-lg pointer-events-none">
           <p className="text-xl font-medium text-white">Suelta el MP3 aquí</p>
         </div>
       )}
 
-      {/* Barra de audio: siempre visible, por encima del canvas */}
+      {/* Barra de audio y botones de subir archivos: oculta visualmente */}
       <div
-        className="hidden bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 bg-black/90 backdrop-blur-md rounded-full px-6 py-3 border border-white/20 shadow-xl min-w-[320px] pointer-events-auto"
-        style={{ isolation: "isolate" }}
+        className="bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 bg-black/90 backdrop-blur-md rounded-full px-6 py-3 border border-white/20 shadow-xl min-w-[320px] pointer-events-auto sr-only"
+        style={{ isolation: "isolate", position: "fixed", visibility: "hidden", opacity: 0, pointerEvents: "none" }}
+        aria-hidden
       >
         {!hasAudio ? (
           <label className="flex  items-center gap-3 cursor-pointer hover:text-white text-white/80 text-sm flex-1">
@@ -217,8 +236,8 @@ export default function Home() {
           </label>
         ) : (
           <>
-            <span className="text-white/90 text-sm truncate max-w-[180px]" title={loadedFileName}>
-              {decodeURIComponent(loadedFileName)}
+            <span className="text-white/90 text-sm truncate max-w-[180px]" title={loadedFileName ?? undefined}>
+              {loadedFileName ? decodeURIComponent(loadedFileName) : ""}
             </span>
             <button
               type="button"

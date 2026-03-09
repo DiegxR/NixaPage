@@ -1,14 +1,12 @@
-import {nextui} from '@nextui-org/theme';
+
 import type { Config } from "tailwindcss";
-import { addDynamicIconSelectors } from "@iconify/tailwind";
+
 const config = {
-  darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
-    "./node_modules/@nextui-org/theme/dist/components/tabs.js"
   ],
   prefix: "",
   theme: {
@@ -96,7 +94,7 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"),addDynamicIconSelectors(),nextui()],
+  plugins: [require("tailwindcss-animate")],
 } satisfies Config;
 
 export default config;
