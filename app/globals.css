@@ -1,0 +1,96 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #050508;
+}
+
+#__next,
+main {
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Meteoros: detrás del modelo, zona derecha, bucle infinito, tenues */
+.meteors-container {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.meteors-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  min-width: 100%;
+  height: 100%;
+}
+
+.meteor {
+  --meteor-x: 50;
+  position: absolute;
+  left: calc(var(--meteor-x) * 1%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(226, 232, 240, 0.85);
+  box-shadow: 0 0 6px 2px rgba(226, 232, 240, 0.5);
+  transform: rotate(45deg);
+  animation: meteor-fall linear infinite;
+  z-index: 1;
+}
+
+.meteor-tail {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: auto;
+  width: 55px;
+  height: 1px;
+  transform: translateY(-50%);
+  background: linear-gradient(to left, rgba(226, 232, 240, 0.7), rgba(226, 232, 240, 0.25), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes meteor-fall {
+  0% {
+    transform: translate(0, 0) rotate(45deg);
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.85;
+  }
+  75% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(400px, 400px) rotate(45deg);
+    opacity: 0;
+  }
+}
