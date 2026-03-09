@@ -67,6 +67,7 @@ export default function Home() {
   const [showMeteors, setShowMeteors] = useState(false);
   const [showNeonButton, setShowNeonButton] = useState(false);
   const [showCinemaImage, setShowCinemaImage] = useState(false);
+  const [experienceStarted, setExperienceStarted] = useState(false);
 
   const {
     frequencyDataRef,
@@ -82,15 +83,20 @@ export default function Home() {
     smoothing: SMOOTHING,
   });
 
-  useEffect(() => {
-    const t = setTimeout(() => setShowMeteors(true), METEORS_START_AT * 1000);
-    return () => clearTimeout(t);
-  }, []);
+  const startExperience = useCallback(() => {
+    setExperienceStarted(true);
+    play();
+  }, [play]);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowNeonButton(true), NEON_BUTTON_APPEAR_AT * 1000);
-    return () => clearTimeout(t);
-  }, []);
+    if (!experienceStarted) return;
+    const t1 = setTimeout(() => setShowMeteors(true), METEORS_START_AT * 1000);
+    const t2 = setTimeout(() => setShowNeonButton(true), NEON_BUTTON_APPEAR_AT * 1000);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [experienceStarted]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -125,30 +131,8 @@ export default function Home() {
   );
 
   const hasAudio = !!loadedFileName;
-  const hasAutoplayedRef = useRef(false);
-
-  // Reproducir en cuanto el audio esté listo (canplaythrough)
-  useEffect(() => {
-    if (!isReady || !hasAudio || hasAutoplayedRef.current) return;
-    hasAutoplayedRef.current = true;
-    play();
-  }, [isReady, hasAudio, play]);
-
-  // Si el navegador bloquea autoplay, intentar reproducir en la primera interacción
-  useEffect(() => {
-    const tryPlayOnInteraction = () => {
-      if (isReady && hasAudio && !isPlaying) {
-        play();
-      }
-    };
-    const events = ["click", "keydown", "touchstart"] as const;
-    const fn = () => {
-      tryPlayOnInteraction();
-      events.forEach((e) => document.removeEventListener(e, fn));
-    };
-    events.forEach((ev) => document.addEventListener(ev, fn, { once: true }));
-    return () => events.forEach((ev) => document.removeEventListener(ev, fn));
-  }, [isReady, hasAudio, isPlaying, play]);
+  const resourcesReady = isReady;
+  const showStartOverlay = resourcesReady && !experienceStarted;
 
   return (
     <main
@@ -170,9 +154,39 @@ export default function Home() {
         <Meteors number={100} />
       </div>
 
-      <Scene frequencyDataRef={frequencyDataRef} />
+      <Scene frequencyDataRef={frequencyDataRef} experienceStarted={experienceStarted} />
 
-      {/* Botón neon: parte inferior de la pantalla */}
+      {/* Overlay: botón para iniciar la experiencia cuando todos los recursos están listos */}
+      {showStartOverlay && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9998,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(5, 5, 8, 0.85)",
+            isolation: "isolate",
+          }}
+        >
+          <button
+            type="button"
+            onClick={startExperience}
+            className="custom-btn btn-5"
+            style={{
+              padding: "1rem 2.5rem",
+              fontSize: "1.25rem",
+              cursor: "pointer",
+            }}
+          >
+            <span></span>
+            <span>Iniciar experiencia</span>
+          </button>
+        </div>
+      )}
+
+      {/* Botón neon: parte inferior de la pantalla, por encima del canvas */}
       {showNeonButton && (
         <div
           className="neon-button-frame"
@@ -181,8 +195,9 @@ export default function Home() {
             bottom: "2rem",
             left: "50%",
             transform: "translateX(-50%)",
-            zIndex: 90,
+            zIndex: 9999,
             pointerEvents: "auto",
+            isolation: "isolate",
           }}
         >
           <button

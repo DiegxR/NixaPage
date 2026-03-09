@@ -22,6 +22,25 @@ export const SECOND_MODEL_OFFSET_Z = 50;
 /** Segundos que tarda el movimiento (escala/ritmo) del modelo exterior en pasar de sutil a completo */
 export const SECOND_MODEL_MOVEMENT_GROW_DURATION = 18;
 
+/** Tercer modelo GLB (mismo recurso, aparece más tarde) */
+export const THIRD_MODEL_PATH = "/24_dizzying_space_travel_-_inktober2019.glb";
+/** Segundos en los que empieza a aparecer el tercer modelo (40 s después del inicio) */
+export const THIRD_MODEL_APPEAR_AT = 40;
+/** Segundos que tarda el tercer modelo en aparecer por completo */
+export const THIRD_MODEL_APPEAR_DURATION = 12;
+/** Escala final del tercer modelo (más pequeño que el resto) */
+export const THIRD_MODEL_SCALE = 1;
+/** Escala inicial del tercer modelo */
+export const THIRD_MODEL_INITIAL_SCALE = 0.01;
+/** Posición del tercer modelo (X, Y, Z) */
+export const THIRD_MODEL_OFFSET_X = 100;
+export const THIRD_MODEL_OFFSET_Y = 100;
+export const THIRD_MODEL_OFFSET_Z = 100;
+/** Intensidad del latido de escala del tercer modelo con la música (mayor = más notable) */
+export const THIRD_MODEL_MUSIC_SCALE = 6;
+/** Intensidad de la rotación con la música (mayor = gira más al ritmo) */
+export const THIRD_MODEL_MUSIC_ROTATION = 6;
+
 /** Sensibilidad del movimiento respecto al audio (1 = normal, mayor = más exagerado) */
 export const AUDIO_SENSITIVITY = 6;
 
@@ -43,8 +62,8 @@ export const TIMELAPSE_APPROACH_DURATION = 30;
 export const STARS_APPEAR_AT = 55;
 /** Segundos en los que empiezan los meteoros (igual que las estrellas: 55 s) */
 export const METEORS_START_AT = 55;
-/** Segundos en los que aparece el botón neon (80 s = 1 min 20 s) */
-export const NEON_BUTTON_APPEAR_AT = 80;
+/** Segundos en los que aparece el botón neon (20 s para que sea visible pronto) */
+export const NEON_BUTTON_APPEAR_AT = 20;
 /** Segundos en los que empieza a sonar el audio (auto-play) */
 export const AUDIO_START_AT = 40;
 

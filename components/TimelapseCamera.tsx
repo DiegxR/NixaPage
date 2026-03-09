@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Vector3 } from "three";
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/config/visualizer";
 
 interface TimelapseCameraProps {
+  started?: boolean;
   onShowStars: (show: boolean) => void;
   onZoomComplete?: (complete: boolean) => void;
 }
@@ -22,15 +23,27 @@ const startPos = new Vector3(0, 0, CAMERA_START_Z);
 const endPos = new Vector3(0, 0, CAMERA_END_Z);
 const lookAtTarget = new Vector3(0, 0, 0);
 
-export function TimelapseCamera({ onShowStars, onZoomComplete }: TimelapseCameraProps) {
-  const elapsedRef = useRef(0);
+export function TimelapseCamera({ started = false, onShowStars, onZoomComplete }: TimelapseCameraProps) {
+  const startClockTimeRef = useRef<number | null>(null);
   const starsShownRef = useRef(false);
   const zoomCompleteRef = useRef(false);
   const { camera } = useThree();
 
-  useFrame((_, delta) => {
-    elapsedRef.current += delta;
-    const t = elapsedRef.current;
+  useEffect(() => {
+    if (!started) startClockTimeRef.current = null;
+  }, [started]);
+
+  useFrame((state) => {
+    if (!started) {
+      camera.position.copy(startPos);
+      camera.lookAt(0, 0, 0);
+      camera.updateProjectionMatrix();
+      return;
+    }
+    if (startClockTimeRef.current === null) {
+      startClockTimeRef.current = state.clock.elapsedTime;
+    }
+    const t = state.clock.elapsedTime - startClockTimeRef.current;
 
     if (t < TIMELAPSE_APPROACH_DURATION) {
       const progress = Math.min(t / TIMELAPSE_APPROACH_DURATION, 1);

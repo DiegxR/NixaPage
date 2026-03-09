@@ -10,12 +10,13 @@ import { MODEL_3D_PATH, CAMERA_START_Z } from "@/config/visualizer";
 
 interface SceneProps {
   frequencyDataRef: MutableRefObject<Uint8Array>;
+  experienceStarted?: boolean;
 }
 
 const NEON_PURPLE = "#b24bf3";
 const NEON_PURPLE_DIM = "#6b2d99";
 
-export function Scene({ frequencyDataRef }: SceneProps) {
+export function Scene({ frequencyDataRef, experienceStarted = false }: SceneProps) {
   const [modelError, setModelError] = useState<string | null>(null);
   const [showStars, setShowStars] = useState(false);
   const [controlsEnabled, setControlsEnabled] = useState(false);
@@ -70,12 +71,14 @@ export function Scene({ frequencyDataRef }: SceneProps) {
         <pointLight position={[0, 2.5, 2]} intensity={0.8} color={NEON_PURPLE} distance={8} />
         <directionalLight position={[0, 0, 5]} intensity={0.8} />
         <TimelapseCamera
+          started={experienceStarted}
           onShowStars={setShowStars}
           onZoomComplete={setControlsEnabled}
         />
         {showStars && <TimelapseStars />}
         <MusicReactiveObject
           frequencyDataRef={frequencyDataRef}
+          experienceStarted={experienceStarted}
           onLoadError={setModelError}
           disableMouseFollow={controlsEnabled}
         />

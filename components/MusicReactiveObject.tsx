@@ -24,6 +24,16 @@ import {
   SECOND_MODEL_OFFSET_Y,
   SECOND_MODEL_OFFSET_Z,
   SECOND_MODEL_MOVEMENT_GROW_DURATION,
+  THIRD_MODEL_PATH,
+  THIRD_MODEL_APPEAR_AT,
+  THIRD_MODEL_APPEAR_DURATION,
+  THIRD_MODEL_SCALE,
+  THIRD_MODEL_INITIAL_SCALE,
+  THIRD_MODEL_OFFSET_X,
+  THIRD_MODEL_OFFSET_Y,
+  THIRD_MODEL_OFFSET_Z,
+  THIRD_MODEL_MUSIC_SCALE,
+  THIRD_MODEL_MUSIC_ROTATION,
   EDGES_THRESHOLD_ANGLE,
   MOUSE_LATERAL_AMOUNT,
   MOUSE_DEPTH_AMOUNT,
@@ -37,6 +47,8 @@ const MESH_DARK_COLOR = 0x0a0612;
 
 interface MusicReactiveObjectProps {
   frequencyDataRef: MutableRefObject<Uint8Array>;
+  /** Cuando true, el timelapse y las animaciones de aparición usan el tiempo desde que se inició la experiencia */
+  experienceStarted?: boolean;
   onLoadError?: (message: string) => void;
   /** Cuando true (zoom completado), el objeto deja de seguir al cursor */
   disableMouseFollow?: boolean;
@@ -156,12 +168,15 @@ function FallbackMesh({
   );
 }
 
-export function MusicReactiveObject({ frequencyDataRef, onLoadError, disableMouseFollow = false }: MusicReactiveObjectProps) {
+export function MusicReactiveObject({ frequencyDataRef, experienceStarted = false, onLoadError, disableMouseFollow = false }: MusicReactiveObjectProps) {
   const groupRef = useRef<Group>(null);
   const outerGroupRef = useRef<Group>(null);
   const innerGroupRef = useRef<Group>(null);
+  const thirdGroupRef = useRef<Group>(null);
+  const startClockTimeRef = useRef<number | null>(null);
   const [loadedScene, setLoadedScene] = useState<Group | null>(null);
   const [outerScene, setOuterScene] = useState<Group | null>(null);
+  const [thirdScene, setThirdScene] = useState<Group | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const edgeLinesRef = useRef<LineSegments[]>([]);
   const processedSceneRef = useRef<Group | null>(null);
@@ -245,6 +260,38 @@ export function MusicReactiveObject({ frequencyDataRef, onLoadError, disableMous
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    setThirdScene(null);
+    const loadThird = async () => {
+      try {
+        const { GLTFLoader } = await import("three/examples/jsm/loaders/GLTFLoader.js");
+        const loader = new GLTFLoader();
+        const url = THIRD_MODEL_PATH.startsWith("/")
+          ? `${typeof window !== "undefined" ? window.location.origin : ""}${THIRD_MODEL_PATH}`
+          : THIRD_MODEL_PATH;
+        const gltf = await new Promise<{ scene: Group }>((resolve, reject) => {
+          loader.load(url, resolve, undefined, reject);
+        });
+        if (cancelled) return;
+        const scene = gltf.scene.clone();
+        darkenMeshMaterials(scene);
+        addNeonEdgesToScene(scene);
+        setThirdScene(scene);
+      } catch {
+        if (!cancelled) setThirdScene(null);
+      }
+    };
+    loadThird();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!experienceStarted) startClockTimeRef.current = null;
+  }, [experienceStarted]);
+
   const targetPosRef = useRef(new Vector3(0, 0, 0));
   const originRef = useRef(new Vector3(0, 0, 0));
   const targetRotRef = useRef(new Vector3(0, 0, 0));
@@ -254,7 +301,13 @@ export function MusicReactiveObject({ frequencyDataRef, onLoadError, disableMous
     const group = groupRef.current;
     if (!group) return;
 
-    const elapsed = state.clock.elapsedTime;
+    if (!experienceStarted) {
+      return;
+    }
+    if (startClockTimeRef.current === null) {
+      startClockTimeRef.current = state.clock.elapsedTime;
+    }
+    const elapsed = state.clock.elapsedTime - startClockTimeRef.current;
     const appearProgress = Math.min(
       1,
       Math.max(0, (elapsed - SECOND_MODEL_APPEAR_AT) / SECOND_MODEL_APPEAR_DURATION)
@@ -284,6 +337,23 @@ export function MusicReactiveObject({ frequencyDataRef, onLoadError, disableMous
     }
     if (innerGroupRef.current) {
       innerGroupRef.current.scale.setScalar(musicScale);
+    }
+    const thirdAppearProgress = Math.min(
+      1,
+      Math.max(0, (elapsed - THIRD_MODEL_APPEAR_AT) / THIRD_MODEL_APPEAR_DURATION)
+    );
+    if (thirdGroupRef.current) {
+      const delta = state.clock.getDelta();
+      const baseScale =
+        THIRD_MODEL_INITIAL_SCALE +
+        (THIRD_MODEL_SCALE - THIRD_MODEL_INITIAL_SCALE) * thirdAppearProgress;
+      const musicScaleThird = 1 + avg * (THIRD_MODEL_MUSIC_SCALE - 1);
+      const scaleWithMusic = baseScale * musicScaleThird;
+      thirdGroupRef.current.scale.setScalar(scaleWithMusic);
+      thirdGroupRef.current.visible = thirdAppearProgress > 0;
+      const musicRot = (low * 0.08 + mid * 0.04 + high * 0.02) * THIRD_MODEL_MUSIC_ROTATION;
+      thirdGroupRef.current.rotation.y += delta * (0.25 + musicRot);
+      thirdGroupRef.current.rotation.x += delta * (0.08 + low * 0.04);
     }
 
     if (!disableMouseFollow) {
@@ -318,6 +388,14 @@ export function MusicReactiveObject({ frequencyDataRef, onLoadError, disableMous
         {loadedScene && (
           <primitive object={loadedScene} castShadow receiveShadow />
         )}
+      </group>
+      <group
+        ref={thirdGroupRef}
+        position={[THIRD_MODEL_OFFSET_X, THIRD_MODEL_OFFSET_Y, THIRD_MODEL_OFFSET_Z]}
+        scale={[THIRD_MODEL_INITIAL_SCALE, THIRD_MODEL_INITIAL_SCALE, THIRD_MODEL_INITIAL_SCALE]}
+        visible={false}
+      >
+        {thirdScene && <primitive object={thirdScene} castShadow receiveShadow />}
       </group>
     </group>
   );
