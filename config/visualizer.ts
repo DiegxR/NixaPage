@@ -18,12 +18,12 @@ export const SECOND_MODEL_INITIAL_SCALE = 0.1;
 /** Posición del modelo exterior (X, Y, Z en unidades). [0,0,0] = mismo centro que el modelo principal */
 export const SECOND_MODEL_OFFSET_X = -100;
 export const SECOND_MODEL_OFFSET_Y = -100;
-export const SECOND_MODEL_OFFSET_Z = 0;
+export const SECOND_MODEL_OFFSET_Z = 50;
 /** Segundos que tarda el movimiento (escala/ritmo) del modelo exterior en pasar de sutil a completo */
 export const SECOND_MODEL_MOVEMENT_GROW_DURATION = 18;
 
 /** Sensibilidad del movimiento respecto al audio (1 = normal, mayor = más exagerado) */
-export const AUDIO_SENSITIVITY = 3;
+export const AUDIO_SENSITIVITY = 6;
 
 /** Suavizado del análisis de audio (0 = muy reactivo, 1 = muy suave) */
 export const SMOOTHING = 0.5;
@@ -43,8 +43,8 @@ export const TIMELAPSE_APPROACH_DURATION = 30;
 export const STARS_APPEAR_AT = 55;
 /** Segundos en los que empiezan los meteoros (igual que las estrellas: 55 s) */
 export const METEORS_START_AT = 55;
-/** Segundos en los que aparece el botón neon (1 min = 60) */
-export const NEON_BUTTON_APPEAR_AT = 60;
+/** Segundos en los que aparece el botón neon (80 s = 1 min 20 s) */
+export const NEON_BUTTON_APPEAR_AT = 80;
 /** Segundos en los que empieza a sonar el audio (auto-play) */
 export const AUDIO_START_AT = 40;
 

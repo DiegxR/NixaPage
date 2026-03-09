@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAudioAnalyzer } from "@/hooks/useAudioAnalyzer";
 import { Scene } from "@/components/Scene";
@@ -22,7 +23,6 @@ function CinemaImageWithAnimation({
     <motion.img
       src={src}
       alt="You are my cinema"
-      className="max-w-[90vw] max-h-[90vh] w-auto h-auto object-contain select-none cursor-default"
       initial={{ scale: 0, opacity: 0 }}
       animate={
         phase === "expand"
@@ -47,6 +47,15 @@ function CinemaImageWithAnimation({
       }
       onClick={onClick}
       style={{
+        display: "block",
+        position: "relative",
+        zIndex: 1,
+        maxWidth: "90vw",
+        maxHeight: "90vh",
+        width: "auto",
+        height: "auto",
+        objectFit: "contain",
+        pointerEvents: "auto",
         filter: "drop-shadow(0 0 30px rgba(147, 51, 234, 0.5))",
       }}
     />
@@ -58,16 +67,6 @@ export default function Home() {
   const [showMeteors, setShowMeteors] = useState(false);
   const [showNeonButton, setShowNeonButton] = useState(false);
   const [showCinemaImage, setShowCinemaImage] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setShowMeteors(true), METEORS_START_AT * 1000);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    const t = setTimeout(() => setShowNeonButton(true), NEON_BUTTON_APPEAR_AT * 1000);
-    return () => clearTimeout(t);
-  }, []);
 
   const {
     frequencyDataRef,
@@ -82,6 +81,21 @@ export default function Home() {
     fftSize: FFT_SIZE,
     smoothing: SMOOTHING,
   });
+
+  // Autoplay: lo primero al cargar la página
+  useEffect(() => {
+    play();
+  }, [play]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowMeteors(true), METEORS_START_AT * 1000);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowNeonButton(true), NEON_BUTTON_APPEAR_AT * 1000);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -116,17 +130,8 @@ export default function Home() {
   );
 
   const hasAudio = !!loadedFileName;
-  const hasAutoplayed = useRef(false);
 
-  // Autoplay en cuanto el audio por defecto esté listo al cargar la página
-  useEffect(() => {
-    if (isReady && hasAudio && !hasAutoplayed.current) {
-      hasAutoplayed.current = true;
-      play();
-    }
-  }, [isReady, hasAudio, play]);
-
-  // Refuerzo: si el navegador bloquea autoplay, intentar reproducir en la primera interacción
+  // Si el navegador bloquea autoplay, intentar reproducir en la primera interacción
   useEffect(() => {
     const tryPlayOnInteraction = () => {
       if (isReady && hasAudio && !isPlaying) {
@@ -164,15 +169,15 @@ export default function Home() {
 
       <Scene frequencyDataRef={frequencyDataRef} />
 
-      {/* Botón neon: centrado absoluto en la pantalla */}
+      {/* Botón neon: parte inferior de la pantalla */}
       {showNeonButton && (
         <div
           className="neon-button-frame"
           style={{
             position: "fixed",
-            top: "50%",
+            bottom: "2rem",
             left: "50%",
-            transform: "translate(-50%, -50%)",
+            transform: "translateX(-50%)",
             zIndex: 90,
             pointerEvents: "auto",
           }}
@@ -188,28 +193,41 @@ export default function Home() {
         </div>
       )}
 
-      {/* Overlay: imagen que se expande y palpita al hacer clic en "Conoce más" */}
-      <AnimatePresence>
-        {showCinemaImage && (
-          <motion.div
-            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => setShowCinemaImage(false)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === "Escape" && setShowCinemaImage(false)}
-            aria-label="Cerrar"
-          >
-            <CinemaImageWithAnimation
-              src={CINEMA_IMAGE}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </motion.div>
+      {/* Overlay de imagen: renderizado por portal en document.body para quedar siempre encima del canvas */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {showCinemaImage && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setShowCinemaImage(false)}
+                onKeyDown={(e) => e.key === "Escape" && setShowCinemaImage(false)}
+                role="button"
+                tabIndex={0}
+                aria-label="Cerrar"
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  zIndex: 99999,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(0, 0, 0, 0.88)",
+                  isolation: "isolate",
+                }}
+              >
+                <CinemaImageWithAnimation
+                  src={CINEMA_IMAGE}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
 
       {/* Overlay de soltar archivo: oculto (subida de archivos no visible) */}
       {false && isDragOver && (
