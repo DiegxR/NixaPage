@@ -1,7 +1,18 @@
-.node_modules
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Next.js
 .next
+out
+
+# Env
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Assets pesados (subir por LFS o colocar manualmente en el servidor)
+# public/Hitem3d-1773009408248.glb
